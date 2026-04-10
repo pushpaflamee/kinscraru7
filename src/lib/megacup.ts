@@ -1,5 +1,6 @@
 const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 
+
 export class MegaUp {
     private static apiBase = "https://enc-dec.app/api";
 
@@ -80,33 +81,21 @@ export class MegaUp {
 
     static async extract(videoUrl: string): Promise<any> {
         try {
-            const mediaUrl = videoUrl.replace("/e/", "/media/");
-
-            // Derive origin from the embed URL so Sec-Fetch-Site: same-origin is correct
-            const embedOrigin = new URL(videoUrl).origin;
-
-            const res = await fetch(mediaUrl, {
+            const url = videoUrl.replace("/e/", "/media/");
+            const res = await fetch(url, {
                 headers: {
-                    "User-Agent": USER_AGENT,
-                    "Referer": videoUrl,            // must point to the /e/ embed page
-                    "Origin": embedOrigin,           // megaup checks this matches its own origin
-                    "Accept": "application/json, text/plain, */*",
-                    "Accept-Language": "en-US,en;q=0.9",
-                    "X-Requested-With": "XMLHttpRequest",
                     "Connection": "keep-alive",
-                    "Sec-Fetch-Dest": "empty",
-                    "Sec-Fetch-Mode": "cors",
-                    "Sec-Fetch-Site": "same-origin",
+                    "User-Agent": USER_AGENT,
+                    "Referer": videoUrl,
                 }
             });
-
+            // Check if response is JSON before parsing
             const contentType = res.headers.get("content-type") || "";
             if (!contentType.includes("application/json")) {
                 const text = await res.text();
-                console.error(`Non-JSON response from ${mediaUrl}:`, text.substring(0, 200));
-                throw new Error(`Expected JSON but got ${res.status} ${res.statusText} from ${mediaUrl}`);
+                console.error(`Non-JSON response from ${url}:`, text.substring(0, 200));
+                throw new Error(`Expected JSON but got ${res.status} ${res.statusText} from ${url}`);
             }
-
             const data = await res.json();
             const decrypted = await this.decode(data.result);
 
@@ -127,5 +116,3 @@ export class MegaUp {
         }
     }
 }
-
-exit code 0
