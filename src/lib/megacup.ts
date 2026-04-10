@@ -82,11 +82,20 @@ export class MegaUp {
     static async extract(videoUrl: string): Promise<any> {
         try {
             const url = videoUrl.replace("/e/", "/media/");
+            // Extract origin from the embed URL (e.g. https://megaup.nl)
+            const embedOrigin = new URL(videoUrl).origin;
             const res = await fetch(url, {
                 headers: {
-                    "Connection": "keep-alive",
                     "User-Agent": USER_AGENT,
+                    "Accept": "application/json, text/javascript, */*; q=0.01",
+                    "Accept-Language": "en-US,en;q=0.9",
+                    "Connection": "keep-alive",
                     "Referer": videoUrl,
+                    "Origin": embedOrigin,
+                    "Sec-Fetch-Dest": "empty",
+                    "Sec-Fetch-Mode": "cors",
+                    "Sec-Fetch-Site": "same-origin",
+                    "X-Requested-With": "XMLHttpRequest",
                 }
             });
             // Check if response is JSON before parsing
